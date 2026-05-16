@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.yksanjo/gmem",
+  "description": "Persistent project memory MCP server for Solana AI agents — schema-typed entities for Programs, Accounts/PDAs (with seeds), Instructions, architectural Decisions, audit Findings, and Integrations. Anchor workspace + Solana CLI auto-ingest, SQLite + FTS5 BM25 ranking, append-only versioning, git-aware diffs.",
+  "repository": {
+    "url": "https://github.com/yksanjo/gmem",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "gmem",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Override the auto-resolved memory database path. Defaults to ~/.gmem/<projectHash>/memory.db, with one db file per Solana project (project root resolved from Anchor.toml or workspace Cargo.toml).",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "GMEM_DB"
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 {
   "name": "gmem",
   "version": "1.0.0",
+  "mcpName": "io.github.yksanjo/gmem",
   "type": "module",
   "description": "Persistent project memory for Solana AI agents — an MCP server with first-class entities for Programs, Accounts, PDAs, Instructions, Decisions, Findings, and Integrations.",
   "license": "MIT",
