@@ -1,0 +1,25 @@
+# Tests are useful for the repo, not for npm consumers.
+dist/scripts/
+src/
+
+# Source files / build inputs not needed at runtime.
+tsconfig.json
+fixtures/
+.github/
+
+# Local artifacts.
+*.db
+*.sqlite
+*.sqlite3
+.gmem/
+node_modules/
+*.log
+.DS_Store
+coverage/
+
+# Exported AI session transcripts (these accidentally shipped in v0.x).
+claude-session.jsonl
+codex-session.jsonl
+
+# Dev-only docs.
+GRANT-APPLICATION.md

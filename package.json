@@ -1,12 +1,53 @@
 {
   "name": "gmem",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
-  "description": "Persistent project memory for Solana AI agents — an MCP server",
+  "description": "Persistent project memory for Solana AI agents — an MCP server with first-class entities for Programs, Accounts, PDAs, Instructions, Decisions, Findings, and Integrations.",
   "license": "MIT",
+  "author": "yksanjo (https://github.com/yksanjo)",
+  "homepage": "https://github.com/yksanjo/gmem",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yksanjo/gmem.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yksanjo/gmem/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "solana",
+    "anchor",
+    "ai",
+    "agent",
+    "memory",
+    "claude",
+    "claude-code",
+    "cursor",
+    "developer-tools"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "gmem": "dist/index.js"
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/db.js",
+    "dist/db.d.ts",
+    "dist/schemas.js",
+    "dist/schemas.d.ts",
+    "dist/ingest/",
+    "schema/",
+    "examples/",
+    "SPEC.md",
+    "ROADMAP.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc",
@@ -17,19 +58,20 @@
     "test:v03": "tsx src/scripts/test-v03.ts",
     "test:v04": "tsx src/scripts/test-v04.ts",
     "test:v05": "tsx src/scripts/test-v05.ts",
-    "test": "npm run test:v02 && npm run test:v03 && npm run test:v04 && npm run test:v05 && npm run build && npm run test:wire"
+    "test": "npm run test:v02 && npm run test:v03 && npm run test:v04 && npm run test:v05 && npm run build && npm run test:wire",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@solana/web3.js": "^1.98.4",
-    "@types/better-sqlite3": "^7.6.13",
     "ajv": "^8.17.0",
     "ajv-formats": "^3.0.0",
     "better-sqlite3": "^12.10.0",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"

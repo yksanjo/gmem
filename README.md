@@ -48,10 +48,20 @@ competing with any of them.
 
 ## Install
 
-> Not on npm yet — install from this repo while v0.1 stabilizes.
+```bash
+npm install -g gmem
+```
+
+Or, to run it without a global install:
 
 ```bash
-git clone https://github.com/[org]/gmem.git ~/gmem
+npx gmem
+```
+
+Or, to hack on the source:
+
+```bash
+git clone https://github.com/yksanjo/gmem.git ~/gmem
 cd ~/gmem && npm install && npm run build
 ```
 
