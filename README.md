@@ -7,13 +7,20 @@ or anything that speaks MCP — durable, Solana-aware memory of a project across
 program IDs, IDLs, PDA seeds, deployment state, architectural decisions, audit findings.
 So agents stop forgetting what they built yesterday.
 
-Status: **v0.2 — SQLite-backed reference implementation shipped.**
-All four tools (`recall`, `write`, `diff`, `list_decisions`) are real, not stubs:
+Status: **v1.0 — stable.**
+All six tools are real implementations (no stubs):
 - Storage: SQLite via better-sqlite3, one db file per project (auto-resolved from
   `Anchor.toml` / workspace `Cargo.toml`, override with `GMEM_DB`)
 - Ranking: SQLite FTS5 BM25 with a recency boost
-- Versioning: append-only — every write inserts a new `(kind, natural_id, version)` row,
-  reads return the latest, full history available via the in-process `Store` API
+- Versioning: append-only — every write inserts a new `(kind, natural_id, version)` row;
+  reads return the latest; full history available via the in-process `Store` API
+- Anchor ingest: `gmem.ingest_anchor` parses `Anchor.toml`, captures IDL sha256s,
+  records git HEAD as `sourceCommit` per Program
+- Solana CLI context: `gmem.solana_context` reads `~/.config/solana/cli/config.yml`,
+  classifies the cluster, derives the active keypair's pubkey (secret never leaks).
+  `gmem.write` on a Decision auto-attributes `author` + `authorCluster`
+- Git-aware diff: `gmem.diff` accepts both ISO timestamps and git refs (HEAD, HEAD~3,
+  branch names, full and short SHAs)
 
 - License: MIT
 - Spec: see [`SPEC.md`](./SPEC.md)
@@ -84,12 +91,14 @@ cross-project search, agent reputation, on-chain memory anchoring. These are tra
 
 ## Roadmap
 
-- [x] v0.1 — Open spec + JSON schemas + MCP server stub (this commit)
-- [ ] v0.2 — SQLite-backed implementation of all four core tools
-- [ ] v0.3 — Anchor workspace auto-ingest (`Anchor.toml`, IDLs, `target/deploy`)
-- [ ] v0.4 — Solana CLI context (active keypair, cluster) auto-capture
-- [ ] v0.5 — Git linkage so memory is versioned with code
-- [ ] v1.0 — Stable release, 3 worked examples (DeFi / NFT / agent), PR into `awesome-solana-ai`
+- [x] v0.1 — Open spec + JSON schemas + MCP server stub
+- [x] v0.2 — SQLite backend, BM25 ranking, append-only versioning
+- [x] v0.3 — Anchor workspace auto-ingest
+- [x] v0.4 — Solana CLI context capture + Decision auto-attribution
+- [x] v0.5 — git ref resolution in `gmem.diff`
+- [x] v1.0 — Stable release with three worked examples ([DeFi vault](./examples/01-defi-vault/),
+  [cNFT mint](./examples/02-cnft-mint/), [AI agent](./examples/03-ai-agent/)) — see also
+  [PR #168 in `solana-foundation/awesome-solana-ai`](https://github.com/solana-foundation/awesome-solana-ai/pull/168)
 
 ## Contributing
 

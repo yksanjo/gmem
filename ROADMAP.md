@@ -9,7 +9,7 @@ Tracked deliverables for the v1.0 cycle, mapped to the Solana Foundation grant m
 | 3 | v0.3 — Anchor auto-ingest | `Anchor.toml` parser, IDL hash capture, deploy artifact ingestion | ✅ shipped v0.3 (2026-05-16) | 2026-W25 |
 | 4 | v0.4 — Solana CLI context | Active keypair + cluster capture, signed `Decision` entries | ✅ shipped v0.4 (2026-05-16) | 2026-W26 |
 | 5 | v0.5 — Git linkage | `gmem.diff` against arbitrary commits, JSONL memory log alongside SQLite | ✅ shipped v0.5 (2026-05-16) — `gmem.diff` resolves HEAD / HEAD~N / branches / full+short SHAs into ISO timestamps via `git show -s --format=%cI`. JSONL log deferred to v1.x. | 2026-W27 |
-| 6 | v1.0 — Stable release | 3 worked examples (DeFi / NFT / agent), tagged release, PR into `solana-foundation/awesome-solana-ai` | 🔜 | 2026-W28 |
+| 6 | v1.0 — Stable release | 3 worked examples (DeFi / NFT / agent), tagged release, PR into `solana-foundation/awesome-solana-ai` | ✅ shipped v1.0 (2026-05-16) — three worked examples in `examples/`, PR #168 open at `solana-foundation/awesome-solana-ai` | 2026-W28 |
 
 ## Beyond v1
 

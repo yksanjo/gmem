@@ -243,7 +243,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v0.5.0 — listening on stdio\n` +
+    `gmem v1.0.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
     `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context\n`,
