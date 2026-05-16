@@ -19,6 +19,7 @@ import addFormats from "ajv-formats";
 import { Kinds, schemas, type Kind } from "./schemas.js";
 import { Store, resolveDbPath, resolveProjectRoot } from "./db.js";
 import { ingestAnchorWorkspace } from "./ingest/anchor.js";
+import { readSolanaCliContext, isValidPubkey } from "./ingest/solana-cli.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
@@ -93,6 +94,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
       },
     },
+    {
+      name: "gmem.solana_context",
+      description: "Read the active Solana CLI context (`~/.config/solana/cli/config.yml`) and return the configured cluster, RPC URL, and the public address of the active keypair. Used to auto-attribute Decision writes to a developer wallet. v0.4 milestone. Does not return the secret key.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          configPath: { type: "string", description: "Optional path to the Solana CLI config.yml. Defaults to ~/.config/solana/cli/config.yml." },
+        },
+      },
+    },
   ],
 }));
 
@@ -128,6 +139,21 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       if (!Kinds.includes(kind)) {
         return jsonResult({ ok: false, error: `unknown kind: ${kind}` });
       }
+
+      // v0.4: auto-attribute Decisions to the active Solana keypair when the
+      // caller hasn't already set a `notes` line claiming attribution.
+      if (kind === "Decision" && !entity.author) {
+        try {
+          const ctx = readSolanaCliContext();
+          if (ctx.pubkey && isValidPubkey(ctx.pubkey)) {
+            (entity as Record<string, unknown>).author = ctx.pubkey;
+            if (ctx.cluster) (entity as Record<string, unknown>).authorCluster = ctx.cluster;
+          }
+        } catch {
+          // Soft fail — Solana CLI may not be installed. Caller can still pass entity.author explicitly.
+        }
+      }
+
       const validator = validators[kind];
       if (!validator(entity)) {
         return jsonResult({ ok: false, error: `schema validation failed: ${ajvErrorsToReadable(validator.errors)}` });
@@ -153,6 +179,25 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     case "gmem.list_decisions": {
       const limit = Number(a.limit ?? 50);
       return jsonResult({ decisions: store.listDecisions(limit) });
+    }
+
+    case "gmem.solana_context": {
+      const configPath = typeof a.configPath === "string" ? a.configPath : undefined;
+      try {
+        const ctx = readSolanaCliContext(configPath);
+        return jsonResult({
+          ok: true,
+          configPath: ctx.configPath,
+          cluster: ctx.cluster ?? null,
+          rpcUrl: ctx.rpcUrl ?? null,
+          commitment: ctx.commitment ?? null,
+          keypairPath: ctx.keypairPath ?? null,
+          pubkey: ctx.pubkey ?? null,
+          warnings: ctx.warnings,
+        });
+      } catch (e) {
+        return jsonResult({ ok: false, error: (e as Error).message });
+      }
     }
 
     case "gmem.ingest_anchor": {
@@ -192,10 +237,10 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v0.3.0 — listening on stdio\n` +
+    `gmem v0.4.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
-    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor\n`,
+    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context\n`,
   );
 }
 

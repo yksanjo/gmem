@@ -20,6 +20,16 @@
     },
     "rationale": { "type": "string", "minLength": 1 },
     "date": { "type": "string", "format": "date-time" },
+    "author": {
+      "type": "string",
+      "description": "Base58 Solana public key of the developer who recorded the decision. Auto-attributed by gmem when a Solana CLI keypair is configured (v0.4+).",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "authorCluster": {
+      "type": "string",
+      "description": "Cluster the author's keypair is configured for at the moment of write. Auto-captured alongside `author`.",
+      "enum": ["mainnet-beta", "devnet", "testnet", "localnet", "custom"]
+    },
     "relatedTo": {
       "type": "array",
       "items": {
