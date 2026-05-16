@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gmem.dev/schema/program.json",
+  "title": "Program",
+  "description": "A deployed Solana program tied to a cluster.",
+  "type": "object",
+  "required": ["id", "cluster", "name"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Base58 program ID",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "cluster": {
+      "type": "string",
+      "enum": ["mainnet-beta", "devnet", "testnet", "localnet"]
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "idlHash": {
+      "type": "string",
+      "description": "sha256 hex of the pinned IDL JSON",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "description": "git sha the deployed binary was built from",
+      "pattern": "^[a-f0-9]{7,40}$"
+    },
+    "deployedAt": { "type": "string", "format": "date-time" },
+    "notes": { "type": "string" }
+  }
+}

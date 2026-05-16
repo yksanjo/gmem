@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gmem.dev/schema/finding.json",
+  "title": "Finding",
+  "description": "An audit or review finding.",
+  "type": "object",
+  "required": ["severity", "title", "summary", "status", "discoveredAt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "low", "medium", "high", "critical"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["open", "accepted-risk", "fixed", "wontfix"]
+    },
+    "discoveredAt": { "type": "string", "format": "date-time" },
+    "relatedTo": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "id"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "enum": ["Program", "Account", "Instruction", "Decision", "Finding", "Integration"] },
+          "id":   { "type": "string" }
+        }
+      }
+    }
+  }
+}

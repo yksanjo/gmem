@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gmem.dev/schema/account.json",
+  "title": "Account",
+  "description": "A PDA, ATA, or otherwise-meaningful Solana account.",
+  "type": "object",
+  "required": ["address", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "address": {
+      "type": "string",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["pda", "ata", "keypair", "external"]
+    },
+    "seeds": {
+      "type": "array",
+      "description": "Ordered seed descriptors; only meaningful when kind=pda",
+      "items": {
+        "type": "object",
+        "properties": {
+          "literal": { "type": "string", "description": "UTF-8 string seed" },
+          "ref":     { "type": "string", "description": "Symbolic reference (e.g. user.key())" },
+          "type":    { "type": "string", "description": "Encoded type (e.g. u64, pubkey)" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "program": {
+      "type": "string",
+      "description": "Owning program if not the system program",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "mint": {
+      "type": "string",
+      "description": "For ATAs: the SPL token mint",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "notes": { "type": "string" }
+  }
+}

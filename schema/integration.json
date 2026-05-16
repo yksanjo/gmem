@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gmem.dev/schema/integration.json",
+  "title": "Integration",
+  "description": "A dependency on an external Solana program.",
+  "type": "object",
+  "required": ["name", "programId", "purpose", "addedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "programId": {
+      "type": "string",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "versionPinned": { "type": "string", "description": "SDK or program version pinned by this project" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "addedAt": { "type": "string", "format": "date-time" }
+  }
+}

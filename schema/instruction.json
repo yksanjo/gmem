@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gmem.dev/schema/instruction.json",
+  "title": "Instruction",
+  "description": "A documented instruction on one of the project's programs.",
+  "type": "object",
+  "required": ["program", "name"],
+  "additionalProperties": false,
+  "properties": {
+    "program": {
+      "type": "string",
+      "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "accountsSchema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "isSigner", "isMut"],
+        "additionalProperties": false,
+        "properties": {
+          "name":     { "type": "string" },
+          "isSigner": { "type": "boolean" },
+          "isMut":    { "type": "boolean" },
+          "kind":     { "type": "string", "description": "free-text classifier, e.g. 'pda', 'ata', 'system'" }
+        }
+      }
+    },
+    "argsSchema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "description": "Anchor-style type, e.g. u64, pubkey, vec<u8>" }
+        }
+      }
+    },
+    "lastInvocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slot":      { "type": "integer", "minimum": 0 },
+        "signature": { "type": "string" },
+        "signer":    { "type": "string", "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}
