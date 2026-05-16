@@ -7,9 +7,13 @@ or anything that speaks MCP — durable, Solana-aware memory of a project across
 program IDs, IDLs, PDA seeds, deployment state, architectural decisions, audit findings.
 So agents stop forgetting what they built yesterday.
 
-Status: **pre-release.** Spec frozen at v0.1. Server stub boots and responds to all four
-core tools with deterministic placeholder data. SQLite-backed implementation lands at
-Milestone 2.
+Status: **v0.2 — SQLite-backed reference implementation shipped.**
+All four tools (`recall`, `write`, `diff`, `list_decisions`) are real, not stubs:
+- Storage: SQLite via better-sqlite3, one db file per project (auto-resolved from
+  `Anchor.toml` / workspace `Cargo.toml`, override with `GMEM_DB`)
+- Ranking: SQLite FTS5 BM25 with a recency boost
+- Versioning: append-only — every write inserts a new `(kind, natural_id, version)` row,
+  reads return the latest, full history available via the in-process `Store` API
 
 - License: MIT
 - Spec: see [`SPEC.md`](./SPEC.md)

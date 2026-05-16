@@ -1,6 +1,6 @@
 {
   "name": "gmem",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Persistent project memory for Solana AI agents — an MCP server",
@@ -12,12 +12,16 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "test:wire": "tsx src/scripts/test-wire.ts"
+    "test:wire": "tsx src/scripts/test-wire.ts",
+    "test:v02":  "tsx src/scripts/test-v02.ts",
+    "test":      "npm run test:v02 && npm run build && npm run test:wire"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "ajv": "^8.17.0",
-    "ajv-formats": "^3.0.0"
+    "ajv-formats": "^3.0.0",
+    "better-sqlite3": "^12.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
