@@ -20,6 +20,7 @@ import { Kinds, schemas, type Kind } from "./schemas.js";
 import { Store, resolveDbPath, resolveProjectRoot } from "./db.js";
 import { ingestAnchorWorkspace } from "./ingest/anchor.js";
 import { readSolanaCliContext, isValidPubkey } from "./ingest/solana-cli.js";
+import { resolveRefPair } from "./ingest/git.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
@@ -64,12 +65,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "gmem.diff",
-      description: "Show how memory state changed between two points in time. Accepts either ISO 8601 timestamps directly, or git commit refs (when called from a client that can resolve them). v0.2 implements the timestamp form; commit resolution lands in v0.5.",
+      description: "Show how memory state changed between two points in time. Accepts ISO 8601 timestamps OR git commit refs (HEAD, HEAD~3, branch names, full or short SHAs) — refs are resolved via `git show -s --format=%cI` in the active project root. v0.5 milestone.",
       inputSchema: {
         type: "object",
         properties: {
-          from: { type: "string", description: "ISO 8601 timestamp (e.g. '2026-05-01T00:00:00Z') or — once v0.5 lands — a git commit ref" },
-          to:   { type: "string", description: "ISO 8601 timestamp or git commit ref" },
+          from: { type: "string", description: "ISO 8601 timestamp or git commit ref (e.g. 'HEAD~5', 'main', 'abc1234')" },
+          to:   { type: "string", description: "ISO 8601 timestamp or git commit ref (e.g. 'HEAD')" },
         },
         required: ["from", "to"],
       },
@@ -116,10 +117,6 @@ function ajvErrorsToReadable(errs: ErrorObject[] | null | undefined): string {
   return errs.map((e) => `${e.instancePath || "(root)"} ${e.message}`).join("; ");
 }
 
-function isIsoTimestamp(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) || /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
-
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
   const { name, arguments: args } = req.params;
   const a = (args as Record<string, unknown> | undefined) ?? {};
@@ -163,17 +160,26 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
 
     case "gmem.diff": {
-      const from = String(a.from ?? "");
-      const to = String(a.to ?? "");
-      if (isIsoTimestamp(from) && isIsoTimestamp(to)) {
+      const fromRef = String(a.from ?? "");
+      const toRef = String(a.to ?? "");
+      try {
+        const { from, to } = resolveRefPair(fromRef, toRef, { cwd: resolveProjectRoot() });
         const { added, changed } = store.diffByTimestamp(from, to);
-        return jsonResult({ added, changed, removed: [] });
+        return jsonResult({
+          added,
+          changed,
+          removed: [],
+          resolved: { from, to },
+          inputRefs: { from: fromRef, to: toRef },
+        });
+      } catch (e) {
+        return jsonResult({
+          ok: false,
+          added: [], removed: [], changed: [],
+          error: (e as Error).message,
+          inputRefs: { from: fromRef, to: toRef },
+        });
       }
-      return jsonResult({
-        added: [], removed: [], changed: [],
-        note: `gmem.diff for git commit refs requires per-commit observation, which lands in v0.5. ` +
-              `For now pass ISO 8601 timestamps. Requested: ${from} → ${to}`,
-      });
     }
 
     case "gmem.list_decisions": {
@@ -237,7 +243,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v0.4.0 — listening on stdio\n` +
+    `gmem v0.5.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
     `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context\n`,

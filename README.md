@@ -69,7 +69,7 @@ Then point your MCP client at it. For Claude Code:
 | ---- | ------- |
 | `gmem.recall(query)` | Retrieve memory entries relevant to a natural-language query, ranked by BM25 + recency |
 | `gmem.write(entity)` | Persist a typed memory entry (Program / Account / Instruction / Decision / Finding / Integration); append-only |
-| `gmem.diff(from, to)` | Show how memory state changed between two ISO timestamps (git commit refs land in v0.5) |
+| `gmem.diff(from, to)` | Show how memory state changed between two points in time — accepts ISO timestamps OR git commit refs (HEAD, HEAD~3, branch names, full or short SHAs) |
 | `gmem.list_decisions()` | List all `Decision` entries for the active project, newest first |
 | `gmem.ingest_anchor()` | Auto-ingest an Anchor workspace: parse `Anchor.toml`, capture IDL sha256s from `target/idl/`, record the current git HEAD as source commit, write one Program per (program, cluster) pair |
 | `gmem.solana_context()` | Read the active Solana CLI config (`~/.config/solana/cli/config.yml`), return the configured cluster + RPC URL + active-keypair pubkey. Used by `gmem.write` to auto-attribute Decision entries to the developer wallet. Never returns the secret key. |
