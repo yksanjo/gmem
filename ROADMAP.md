@@ -6,7 +6,7 @@ Tracked deliverables for the v1.0 cycle, mapped to the Solana Foundation grant m
 | - | --------- | ------ | ------ | ------ |
 | 1 | Spec & schema | This repo's `SPEC.md` + `schema/*.json` + stub MCP server | ✅ shipped v0.1 (2026-05-16) | 2026-W21 |
 | 2 | v0.2 — SQLite implementation | Working server: all 4 tools real, BM25 recall, append-only versioning | ✅ shipped v0.2 (2026-05-16) | 2026-W23 |
-| 3 | v0.3 — Anchor auto-ingest | `Anchor.toml` parser, IDL hash capture, deploy artifact ingestion | 🔜 | 2026-W25 |
+| 3 | v0.3 — Anchor auto-ingest | `Anchor.toml` parser, IDL hash capture, deploy artifact ingestion | ✅ shipped v0.3 (2026-05-16) | 2026-W25 |
 | 4 | v0.4 — Solana CLI context | Active keypair + cluster capture, signed `Decision` entries | 🔜 | 2026-W26 |
 | 5 | v0.5 — Git linkage | `gmem.diff` against arbitrary commits, JSONL memory log alongside SQLite | 🔜 | 2026-W27 |
 | 6 | v1.0 — Stable release | 3 worked examples (DeFi / NFT / agent), tagged release, PR into `solana-foundation/awesome-solana-ai` | 🔜 | 2026-W28 |

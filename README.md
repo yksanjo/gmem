@@ -67,10 +67,11 @@ Then point your MCP client at it. For Claude Code:
 
 | Tool | Purpose |
 | ---- | ------- |
-| `gmem.recall(query)` | Retrieve memory entries relevant to a natural-language query, ranked by recency and similarity |
-| `gmem.write(entity)` | Persist a typed memory entry (Program / Account / Instruction / Decision / Finding / Integration) |
-| `gmem.diff(commit_a, commit_b)` | Show how memory state changed between two git commits of the project |
+| `gmem.recall(query)` | Retrieve memory entries relevant to a natural-language query, ranked by BM25 + recency |
+| `gmem.write(entity)` | Persist a typed memory entry (Program / Account / Instruction / Decision / Finding / Integration); append-only |
+| `gmem.diff(from, to)` | Show how memory state changed between two ISO timestamps (git commit refs land in v0.5) |
 | `gmem.list_decisions()` | List all `Decision` entries for the active project, newest first |
+| `gmem.ingest_anchor()` | Auto-ingest an Anchor workspace: parse `Anchor.toml`, capture IDL sha256s from `target/idl/`, record the current git HEAD as source commit, write one Program per (program, cluster) pair |
 
 Full input/output JSON schemas are in [`SPEC.md`](./SPEC.md).
 

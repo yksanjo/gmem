@@ -1,0 +1,19 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.mainnet]
+swap = "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"
+
+[programs.devnet]
+swap = "Fg6PaFpoGXkYsidMpWxqSWtg7LUhwzpVxKp2WzKEHbST"
+
+[programs.localnet]
+swap = "Fg6PaFpoGXkYsidMpWxqSWtg7LUhwzpVxKp2WzKEHbST"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[workspace]
+members = ["programs/*"]

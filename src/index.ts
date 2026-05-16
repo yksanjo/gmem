@@ -18,6 +18,7 @@ import type { ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
 import { Kinds, schemas, type Kind } from "./schemas.js";
 import { Store, resolveDbPath, resolveProjectRoot } from "./db.js";
+import { ingestAnchorWorkspace } from "./ingest/anchor.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
@@ -79,6 +80,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         type: "object",
         properties: {
           limit: { type: "integer", minimum: 1, maximum: 500, default: 50 },
+        },
+      },
+    },
+    {
+      name: "gmem.ingest_anchor",
+      description: "Auto-ingest an Anchor workspace: parses `Anchor.toml`, captures the IDL SHA-256 for each program from `target/idl/<name>.json`, and records the current git HEAD as the source commit. Writes one Program entity per (program, cluster) pair. v0.3 milestone.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          projectRoot: { type: "string", description: "Optional path to the Anchor workspace root. Defaults to the active project root (resolved from cwd)." },
         },
       },
     },
@@ -144,6 +155,34 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       return jsonResult({ decisions: store.listDecisions(limit) });
     }
 
+    case "gmem.ingest_anchor": {
+      const projectRoot = String(a.projectRoot ?? resolveProjectRoot());
+      try {
+        const report = ingestAnchorWorkspace(projectRoot);
+        const written: Array<{ id: string; cluster: string; name: string; version: number }> = [];
+        for (const p of report.programs) {
+          const validator = validators.Program;
+          if (!validator(p)) {
+            report.warnings.push(`Schema rejected program ${p.cluster}:${p.id} — ${ajvErrorsToReadable(validator.errors)}`);
+            continue;
+          }
+          const { version } = store.write("Program", { ...p });
+          written.push({ id: p.id, cluster: p.cluster, name: p.name, version });
+        }
+        return jsonResult({
+          ok: true,
+          projectRoot: report.projectRoot,
+          anchorTomlPath: report.anchorTomlPath,
+          sourceCommit: report.sourceCommit ?? null,
+          programsParsed: report.programs.length,
+          programsWritten: written,
+          warnings: report.warnings,
+        });
+      } catch (e) {
+        return jsonResult({ ok: false, error: (e as Error).message });
+      }
+    }
+
     default:
       return jsonResult({ ok: false, error: `unknown tool: ${name}` });
   }
@@ -153,10 +192,10 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v0.2.0 — listening on stdio\n` +
+    `gmem v0.3.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
-    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions\n`,
+    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor\n`,
   );
 }
 

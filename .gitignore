@@ -14,3 +14,8 @@ build/
 .gmem/
 
 coverage/
+
+# Exported AI session transcripts (for grant applications) — contain prompts,
+# tool calls, and potentially sensitive context. Never commit.
+claude-session.jsonl
+codex-session.jsonl

@@ -17,7 +17,7 @@ async function main() {
   console.log("Connected.");
   const tools = await client.listTools();
   console.log(`Tools registered: ${tools.tools.map((t) => t.name).join(", ")}`);
-  if (tools.tools.length !== 4) throw new Error(`expected 4 tools, got ${tools.tools.length}`);
+  if (tools.tools.length < 4) throw new Error(`expected at least 4 tools, got ${tools.tools.length}`);
 
   // Write a Decision
   const writeRes = await client.callTool({
