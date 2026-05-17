@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.yksanjo/gmem",
-  "description": "Persistent project memory MCP server for Solana AI agents — schema-typed entities for Programs, Accounts/PDAs (with seeds), Instructions, architectural Decisions, audit Findings, and Integrations. Anchor workspace + Solana CLI auto-ingest, SQLite + FTS5 BM25 ranking, append-only versioning, git-aware diffs.",
+  "description": "Persistent, Solana-aware project memory for AI coding agents. Typed entities + git-aware diffs.",
   "repository": {
     "url": "https://github.com/yksanjo/gmem",
     "source": "github"
