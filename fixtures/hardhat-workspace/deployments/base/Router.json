@@ -1,0 +1,6 @@
+{
+  "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "abi": [
+    { "type": "function", "name": "swap", "inputs": [], "outputs": [], "stateMutability": "payable" }
+  ]
+}

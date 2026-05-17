@@ -1,0 +1,6 @@
+{
+  "address": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "abi": [
+    { "type": "function", "name": "deposit", "inputs": [{ "name": "amount", "type": "uint256" }], "outputs": [], "stateMutability": "nonpayable" }
+  ]
+}
