@@ -99,6 +99,24 @@ An audit/review finding.
 | `discoveredAt` | string (ISO 8601) | yes | |
 | `relatedTo` | array of `{ kind, id }` | no | |
 
+### 3.6a Contract (v1.1+)
+
+An EVM smart contract deployed on Ethereum or any EVM-compatible L2 / sidechain.
+The EVM analogue of §3.1 Program. Introduced in v1.1; older clients that don't
+expose the `Contract` kind via `kinds` filter will not receive it.
+
+| Field | Type | Required | Notes |
+| ----- | ---- | -------- | ----- |
+| `address` | string (`0x` + 40 hex) | yes | Checksum-case preserved verbatim |
+| `chain` | string | yes | Canonical chain slug — `ethereum-mainnet`, `base-mainnet`, `optimism-mainnet`, `polygon-mainnet`, `arbitrum-one`, plus testnets and custom values |
+| `chainId` | integer | no | Numeric EVM chain ID (1, 8453, 10, 137, 42161, …) |
+| `name` | string | yes | Human label (e.g. "Vault") |
+| `abiHash` | string (sha256 hex) | no | Canonicalized ABI hash, **invariant to top-level entry reordering** |
+| `sourceCommit` | string (git sha) | no | git sha bytecode was built from |
+| `deployedAt` | string (ISO 8601) | no | |
+| `txHash` | string (`0x` + 64 hex) | no | Deployment transaction hash |
+| `notes` | string | no | |
+
 ### 3.6 Integration
 
 A dependency on an external Solana program.

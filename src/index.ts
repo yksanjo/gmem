@@ -19,6 +19,7 @@ import addFormats from "ajv-formats";
 import { Kinds, schemas, type Kind } from "./schemas.js";
 import { Store, resolveDbPath, resolveProjectRoot } from "./db.js";
 import { ingestAnchorWorkspace } from "./ingest/anchor.js";
+import { ingestHardhatWorkspace } from "./ingest/hardhat.js";
 import { readSolanaCliContext, isValidPubkey } from "./ingest/solana-cli.js";
 import { resolveRefPair } from "./ingest/git.js";
 
@@ -102,6 +103,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         type: "object",
         properties: {
           configPath: { type: "string", description: "Optional path to the Solana CLI config.yml. Defaults to ~/.config/solana/cli/config.yml." },
+        },
+      },
+    },
+    {
+      name: "gmem.ingest_hardhat",
+      description: "Auto-ingest a Hardhat (EVM) workspace: walks up to the nearest hardhat.config.{ts,js,cjs,mjs}, reads every deployment artifact under deployments/<network>/<Contract>.json (hardhat-deploy convention), classifies the network into a canonical chain id, computes a stable ABI sha256, records git HEAD as sourceCommit. Writes one Contract entity per (chain, address). v1.1 milestone. Companion to gmem.ingest_anchor for Solana.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          projectRoot: { type: "string", description: "Optional path to the Hardhat workspace root. Defaults to the active project root (resolved from cwd)." },
         },
       },
     },
@@ -234,6 +245,34 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
     }
 
+    case "gmem.ingest_hardhat": {
+      const projectRoot = String(a.projectRoot ?? resolveProjectRoot());
+      try {
+        const report = ingestHardhatWorkspace(projectRoot);
+        const written: Array<{ address: string; chain: string; name: string; version: number }> = [];
+        for (const c of report.contracts) {
+          const validator = validators.Contract;
+          if (!validator(c)) {
+            report.warnings.push(`Schema rejected contract ${c.chain}:${c.address} — ${ajvErrorsToReadable(validator.errors)}`);
+            continue;
+          }
+          const { version } = store.write("Contract", { ...c });
+          written.push({ address: c.address, chain: c.chain, name: c.name, version });
+        }
+        return jsonResult({
+          ok: true,
+          projectRoot: report.projectRoot,
+          configPath: report.configPath,
+          sourceCommit: report.sourceCommit ?? null,
+          contractsParsed: report.contracts.length,
+          contractsWritten: written,
+          warnings: report.warnings,
+        });
+      } catch (e) {
+        return jsonResult({ ok: false, error: (e as Error).message });
+      }
+    }
+
     default:
       return jsonResult({ ok: false, error: `unknown tool: ${name}` });
   }
@@ -243,10 +282,10 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v1.0.0 — listening on stdio\n` +
+    `gmem v1.1.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
-    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context\n`,
+    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context, gmem.ingest_hardhat\n`,
   );
 }
 

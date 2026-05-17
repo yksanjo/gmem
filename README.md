@@ -7,8 +7,8 @@ or anything that speaks MCP — durable, Solana-aware memory of a project across
 program IDs, IDLs, PDA seeds, deployment state, architectural decisions, audit findings.
 So agents stop forgetting what they built yesterday.
 
-Status: **v1.0 — stable.**
-All six tools are real implementations (no stubs):
+Status: **v1.1 — stable, with EVM support.**
+Seven MCP tools, real implementations (no stubs), backward-compatible wire format:
 - Storage: SQLite via better-sqlite3, one db file per project (auto-resolved from
   `Anchor.toml` / workspace `Cargo.toml`, override with `GMEM_DB`)
 - Ranking: SQLite FTS5 BM25 with a recency boost
@@ -21,6 +21,10 @@ All six tools are real implementations (no stubs):
   `gmem.write` on a Decision auto-attributes `author` + `authorCluster`
 - Git-aware diff: `gmem.diff` accepts both ISO timestamps and git refs (HEAD, HEAD~3,
   branch names, full and short SHAs)
+- EVM support (v1.1): `gmem.ingest_hardhat` parses Hardhat / `hardhat-deploy` workspaces,
+  classifies networks into canonical chain ids (base-mainnet 8453, optimism-mainnet 10,
+  polygon-mainnet 137, arbitrum-one 42161, ethereum-mainnet 1, plus testnets), captures
+  a reorder-invariant ABI SHA-256. New `Contract` entity kind for EVM smart contracts.
 
 - License: MIT
 - Spec: see [`SPEC.md`](./SPEC.md)
@@ -92,6 +96,7 @@ Then point your MCP client at it. For Claude Code:
 | `gmem.list_decisions()` | List all `Decision` entries for the active project, newest first |
 | `gmem.ingest_anchor()` | Auto-ingest an Anchor workspace: parse `Anchor.toml`, capture IDL sha256s from `target/idl/`, record the current git HEAD as source commit, write one Program per (program, cluster) pair |
 | `gmem.solana_context()` | Read the active Solana CLI config (`~/.config/solana/cli/config.yml`), return the configured cluster + RPC URL + active-keypair pubkey. Used by `gmem.write` to auto-attribute Decision entries to the developer wallet. Never returns the secret key. |
+| `gmem.ingest_hardhat()` | **v1.1** — Auto-ingest a Hardhat / EVM workspace: parses `hardhat.config.{ts,js,cjs,mjs}`, reads every deployment artifact under `deployments/<network>/<Contract>.json` (the hardhat-deploy convention), classifies the network into a canonical chain (base-mainnet, optimism-mainnet, etc.), records a reorder-invariant ABI SHA-256 and git HEAD as `sourceCommit`. Writes one Contract entity per (chain, address) pair. |
 
 Full input/output JSON schemas are in [`SPEC.md`](./SPEC.md).
 
@@ -111,6 +116,8 @@ cross-project search, agent reputation, on-chain memory anchoring. These are tra
 - [x] v1.0 — Stable release with three worked examples ([DeFi vault](./examples/01-defi-vault/),
   [cNFT mint](./examples/02-cnft-mint/), [AI agent](./examples/03-ai-agent/)) — see also
   [PR #168 in `solana-foundation/awesome-solana-ai`](https://github.com/solana-foundation/awesome-solana-ai/pull/168)
+- [x] v1.1 — EVM / Hardhat support (Base, Optimism, Polygon, Arbitrum, Ethereum, plus testnets),
+  new `Contract` entity, `gmem.ingest_hardhat` tool, [worked example 04-evm-vault](./examples/04-evm-vault/)
 
 ## Contributing
 
