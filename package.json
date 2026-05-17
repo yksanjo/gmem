@@ -1,5 +1,5 @@
 {
-  "name": "gmem",
+  "name": "@yksanjo/gmem",
   "version": "1.0.0",
   "mcpName": "io.github.yksanjo/gmem",
   "type": "module",

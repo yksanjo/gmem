@@ -49,14 +49,16 @@ competing with any of them.
 ## Install
 
 ```bash
-npm install -g gmem
+npm install -g @yksanjo/gmem
 ```
 
 Or, to run it without a global install:
 
 ```bash
-npx gmem
+npx @yksanjo/gmem
 ```
+
+The installed binary is still called `gmem`.
 
 Or, to hack on the source:
 

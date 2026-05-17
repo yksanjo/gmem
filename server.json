@@ -10,7 +10,7 @@
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "gmem",
+      "identifier": "@yksanjo/gmem",
       "version": "1.0.0",
       "transport": {
         "type": "stdio"
