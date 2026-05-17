@@ -19,3 +19,4 @@ coverage/
 # tool calls, and potentially sensitive context. Never commit.
 claude-session.jsonl
 codex-session.jsonl
+*.local.md
