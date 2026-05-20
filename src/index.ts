@@ -33,7 +33,7 @@ const validators = Object.fromEntries(
 const store = new Store();
 
 const server = new Server(
-  { name: "gmem", version: "0.2.0" },
+  { name: "gmem", version: "1.1.1" },
   { capabilities: { tools: {} } },
 );
 
