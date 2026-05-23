@@ -1,0 +1,22 @@
+# Smithery configuration file: https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required: []
+    properties:
+      gmemDb:
+        type: string
+        description: >-
+          Optional override for the gmem SQLite database path. By default gmem
+          stores one database per Solana/EVM project under
+          ~/.gmem/<projectHash>/memory.db, resolved from Anchor.toml,
+          Hardhat config, or the workspace Cargo.toml.
+  commandFunction: |-
+    (config) => ({
+      command: 'npx',
+      args: ['-y', '@yksanjo/gmem'],
+      env: config.gmemDb ? { GMEM_DB: config.gmemDb } : {}
+    })
+  exampleConfig: {}
