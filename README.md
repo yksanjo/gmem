@@ -100,6 +100,26 @@ Then point your MCP client at it. For Claude Code:
 
 Full input/output JSON schemas are in [`SPEC.md`](./SPEC.md).
 
+## Worked against real Solana projects
+
+The `examples/` folder in this repo demonstrates the *shape* of project memory
+with synthetic projects. These companion repos build the same shape from
+**public Solana programs you've probably heard of**, with every entity citing
+its source:
+
+- [**gmem-example-squads-v4**](https://github.com/yksanjo/gmem-example-squads-v4) —
+  Squads multisig. Anchor workspace auto-ingest + audit pointers.
+- [**gmem-example-marginfi-v2**](https://github.com/yksanjo/gmem-example-marginfi-v2) —
+  Marginfi v2 lending. IDL-driven discovery of the embedded Drift integration
+  (6 `drift_*` instructions surfaced automatically).
+- [**gmem-example-kamino-klend**](https://github.com/yksanjo/gmem-example-kamino-klend) —
+  Kamino klend. V1/V2 coexistence pattern, first-class flash loans, on-chain
+  referrer state, sustained per-minor-release audit cadence — all recorded as
+  `Decision` entries.
+
+Each repo is `npm install && npm run build`-runnable; the resulting `gmem.db`
+is committed for direct inspection.
+
 ## Out of scope for v1.0
 
 To keep the v1 scope honest, gmem v1.0 does NOT include: hosted multi-user sync,
