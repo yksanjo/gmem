@@ -153,6 +153,7 @@ export class Store {
       case "Instruction": return `${entity.program}:${entity.name}`;
       case "Integration": return String(entity.programId);
       case "Contract":    return `${entity.chain}:${String(entity.address).toLowerCase()}`;
+      case "Agent":       return `${entity.cluster}:${entity.pubkey}`;
       case "Decision":
       case "Finding":
         if (!entity.id) entity.id = randomUUID();

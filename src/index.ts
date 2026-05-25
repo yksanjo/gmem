@@ -20,6 +20,8 @@ import { Kinds, schemas, type Kind } from "./schemas.js";
 import { Store, resolveDbPath, resolveProjectRoot } from "./db.js";
 import { ingestAnchorWorkspace } from "./ingest/anchor.js";
 import { ingestHardhatWorkspace } from "./ingest/hardhat.js";
+import { ingestAgentActivity, type IngestedAgent } from "./ingest/helius.js";
+import { scoreAgent } from "./score/agent.js";
 import { readSolanaCliContext, isValidPubkey } from "./ingest/solana-cli.js";
 import { resolveRefPair } from "./ingest/git.js";
 
@@ -33,7 +35,7 @@ const validators = Object.fromEntries(
 const store = new Store();
 
 const server = new Server(
-  { name: "gmem", version: "1.1.1" },
+  { name: "gmem", version: "1.2.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -114,6 +116,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           projectRoot: { type: "string", description: "Optional path to the Hardhat workspace root. Defaults to the active project root (resolved from cwd)." },
         },
+      },
+    },
+    {
+      name: "gmem.ingest_agent_activity",
+      description: "Pull Solana activity for an autonomous-agent wallet via Helius RPC, aggregate it (txCount, distinct peers, failure ratio, age, sanctioned-neighbor count), score it with the transparent v1 heuristic, and write one Agent entity per (cluster, pubkey). Use `fixturePath` to run offline against a snapshot; otherwise set HELIUS_API_KEY or pass `apiKey`. v1.2 milestone — the missing trust layer for agent-to-agent payments.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          pubkey:        { type: "string", description: "Base58 Solana pubkey for the agent wallet." },
+          cluster:       { type: "string", enum: ["mainnet-beta", "devnet", "testnet", "localnet"], description: "Solana cluster. Defaults to mainnet-beta." },
+          limit:         { type: "integer", minimum: 1, maximum: 1000, default: 100, description: "Max signatures to scan." },
+          fixturePath:   { type: "string", description: "Optional offline fixture path (JSON with {signatures, transactions}). Skips the live RPC call." },
+          apiKey:        { type: "string", description: "Helius API key. Falls back to HELIUS_API_KEY env." },
+          sanctionedList:{ type: "array", items: { type: "string" }, description: "Pubkeys to flag as sanctioned counterparties." },
+        },
+        required: ["pubkey"],
+      },
+    },
+    {
+      name: "gmem.score_agent",
+      description: "Look up the latest stored Agent entity for (cluster, pubkey) and return its trust score with the heuristic breakdown showing which factors moved it. Read-only: does not call Helius or write a new version — use gmem.ingest_agent_activity for that. v1.2 milestone.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          pubkey:  { type: "string", description: "Base58 Solana pubkey for the agent wallet." },
+          cluster: { type: "string", enum: ["mainnet-beta", "devnet", "testnet", "localnet"], description: "Solana cluster. Defaults to mainnet-beta." },
+        },
+        required: ["pubkey"],
       },
     },
   ],
@@ -273,6 +303,72 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       }
     }
 
+    case "gmem.ingest_agent_activity": {
+      const pubkey = String(a.pubkey ?? "");
+      const cluster = (typeof a.cluster === "string" ? a.cluster : "mainnet-beta") as IngestedAgent["cluster"];
+      const limit = typeof a.limit === "number" ? a.limit : 100;
+      const fixturePath = typeof a.fixturePath === "string" ? a.fixturePath : undefined;
+      const apiKey = typeof a.apiKey === "string" ? a.apiKey : undefined;
+      const sanctionedList = Array.isArray(a.sanctionedList) ? (a.sanctionedList as string[]) : [];
+      try {
+        const report = await ingestAgentActivity({ pubkey, cluster, limit, fixturePath, apiKey, sanctionedList });
+        const scored = scoreAgent(report.agent);
+        const entity = {
+          ...report.agent,
+          score: scored.score,
+          scoreVersion: scored.scoreVersion,
+          scoreReasoning: scored.scoreReasoning,
+          scoredAt: scored.scoredAt,
+        };
+        const validator = validators.Agent;
+        if (!validator(entity)) {
+          return jsonResult({ ok: false, error: `schema validation failed: ${ajvErrorsToReadable(validator.errors)}` });
+        }
+        const { id, version } = store.write("Agent", entity);
+        return jsonResult({
+          ok: true,
+          id,
+          version,
+          source: report.source,
+          agent: entity,
+          breakdown: scored.breakdown,
+          peers: report.peers,
+          warnings: report.warnings,
+        });
+      } catch (e) {
+        return jsonResult({ ok: false, error: (e as Error).message });
+      }
+    }
+
+    case "gmem.score_agent": {
+      const pubkey = String(a.pubkey ?? "");
+      const cluster = (typeof a.cluster === "string" ? a.cluster : "mainnet-beta") as IngestedAgent["cluster"];
+      const history = store.history("Agent", `${cluster}:${pubkey}`);
+      if (history.length === 0) {
+        return jsonResult({ ok: false, error: `No Agent record for ${cluster}:${pubkey}. Run gmem.ingest_agent_activity first.` });
+      }
+      const latest = history[history.length - 1].data as Record<string, unknown> & IngestedAgent;
+      const rescored = scoreAgent(latest);
+      return jsonResult({
+        ok: true,
+        pubkey,
+        cluster,
+        score: latest.score ?? rescored.score,
+        scoreVersion: latest.scoreVersion ?? rescored.scoreVersion,
+        scoreReasoning: latest.scoreReasoning ?? rescored.scoreReasoning,
+        scoredAt: latest.scoredAt ?? rescored.scoredAt,
+        breakdown: rescored.breakdown,
+        observed: {
+          txCount: latest.txCount,
+          peerCount: latest.peerCount,
+          failureRatio: latest.failureRatio,
+          sanctionedNeighborCount: latest.sanctionedNeighborCount,
+          firstSeen: latest.firstSeen,
+          lastSeen: latest.lastSeen,
+        },
+      });
+    }
+
     default:
       return jsonResult({ ok: false, error: `unknown tool: ${name}` });
   }
@@ -282,10 +378,10 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   process.stderr.write(
-    `gmem v1.1.0 — listening on stdio\n` +
+    `gmem v1.2.0 — listening on stdio\n` +
     `  project: ${resolveProjectRoot()}\n` +
     `  db:      ${resolveDbPath()}\n` +
-    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context, gmem.ingest_hardhat\n`,
+    `  tools:   gmem.recall, gmem.write, gmem.diff, gmem.list_decisions, gmem.ingest_anchor, gmem.solana_context, gmem.ingest_hardhat, gmem.ingest_agent_activity, gmem.score_agent\n`,
   );
 }
 

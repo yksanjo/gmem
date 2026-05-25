@@ -17,6 +17,7 @@ export const Kinds = [
   "Finding",      // audit/review finding (v0.1+)
   "Integration",  // external on-chain dependency (v0.1+)
   "Contract",     // EVM smart contract — Ethereum/Base/Optimism/Polygon/Arbitrum (v1.1+)
+  "Agent",        // autonomous-agent wallet w/ observed activity + trust score (v1.2+)
 ] as const;
 export type Kind = (typeof Kinds)[number];
 
@@ -28,4 +29,5 @@ export const schemas: Record<Kind, object> = {
   Finding: load("finding"),
   Integration: load("integration"),
   Contract: load("contract"),
+  Agent: load("agent"),
 };

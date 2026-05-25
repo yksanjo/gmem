@@ -1,0 +1,27 @@
+{
+  "_comment": "Synthetic Helius getSignaturesForAddress + getTransaction snapshot for v1.2 tests. Agent = Agent11111111111111111111111111111. 10 sigs across ~9 months, 2 failures (sig04, sig08), 3 distinct peers, one of which (BadPeer11111111111111111111111111) we'll mark sanctioned in the test.",
+  "signatures": [
+    { "signature": "sig01", "slot": 100,  "err": null, "blockTime": 1756080000 },
+    { "signature": "sig02", "slot": 200,  "err": null, "blockTime": 1758672000 },
+    { "signature": "sig03", "slot": 300,  "err": null, "blockTime": 1761350400 },
+    { "signature": "sig04", "slot": 400,  "err": { "InstructionError": [0, "Custom"] }, "blockTime": 1764028800 },
+    { "signature": "sig05", "slot": 500,  "err": null, "blockTime": 1766620800 },
+    { "signature": "sig06", "slot": 600,  "err": null, "blockTime": 1769299200 },
+    { "signature": "sig07", "slot": 700,  "err": null, "blockTime": 1771977600 },
+    { "signature": "sig08", "slot": 800,  "err": { "InstructionError": [0, "Custom"] }, "blockTime": 1774396800 },
+    { "signature": "sig09", "slot": 900,  "err": null, "blockTime": 1777075200 },
+    { "signature": "sig10", "slot": 1000, "err": null, "blockTime": 1779580800 }
+  ],
+  "transactions": [
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer1111111111111111111111111111"] } },           "meta": { "err": null },                                  "blockTime": 1756080000 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer1111111111111111111111111111"] } },           "meta": { "err": null },                                  "blockTime": 1758672000 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer1111111111111111111111111111"] } },           "meta": { "err": null },                                  "blockTime": 1761350400 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer1111111111111111111111111111"] } },           "meta": { "err": { "InstructionError": [0, "Custom"] } }, "blockTime": 1764028800 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer2222222222222222222222222222"] } },           "meta": { "err": null },                                  "blockTime": 1766620800 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer2222222222222222222222222222"] } },           "meta": { "err": null },                                  "blockTime": 1769299200 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer2222222222222222222222222222"] } },           "meta": { "err": null },                                  "blockTime": 1771977600 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "Peer2222222222222222222222222222"] } },           "meta": { "err": { "InstructionError": [0, "Custom"] } }, "blockTime": 1774396800 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "BadPeer11111111111111111111111111"] } },          "meta": { "err": null },                                  "blockTime": 1777075200 },
+    { "transaction": { "message": { "accountKeys": ["Agent11111111111111111111111111111", "BadPeer11111111111111111111111111"] } },          "meta": { "err": null },                                  "blockTime": 1779580800 }
+  ]
+}

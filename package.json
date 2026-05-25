@@ -1,6 +1,6 @@
 {
   "name": "@yksanjo/gmem",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "mcpName": "io.github.yksanjo/gmem",
   "type": "module",
   "description": "Persistent project memory for Solana AI agents — an MCP server with first-class entities for Programs, Accounts, PDAs, Instructions, Decisions, Findings, and Integrations.",
@@ -40,6 +40,7 @@
     "dist/schemas.js",
     "dist/schemas.d.ts",
     "dist/ingest/",
+    "dist/score/",
     "schema/",
     "examples/",
     "SPEC.md",
@@ -60,7 +61,8 @@
     "test:v04": "tsx src/scripts/test-v04.ts",
     "test:v05": "tsx src/scripts/test-v05.ts",
     "test:v11": "tsx src/scripts/test-v11.ts",
-    "test": "npm run test:v02 && npm run test:v03 && npm run test:v04 && npm run test:v05 && npm run test:v11 && npm run build && npm run test:wire",
+    "test:v12": "tsx src/scripts/test-v12.ts",
+    "test": "npm run test:v02 && npm run test:v03 && npm run test:v04 && npm run test:v05 && npm run test:v11 && npm run test:v12 && npm run build && npm run test:wire",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
