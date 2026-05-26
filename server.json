@@ -1,27 +1,34 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.yksanjo/gmem",
-  "description": "Persistent, Solana-aware project memory for AI coding agents. Typed entities + git-aware diffs.",
+  "description": "Persistent, multi-chain project memory for AI agents. Typed entities (Programs, Contracts, Decisions, Findings, Agents), git-aware diffs, transparent agent-reputation scoring. Solana + EVM + the missing trust layer for agent-to-agent payments — all in one MCP server.",
   "repository": {
     "url": "https://github.com/yksanjo/gmem",
     "source": "github"
   },
-  "version": "1.1.1",
+  "version": "1.2.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@yksanjo/gmem",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
-          "description": "Override the auto-resolved memory database path. Defaults to ~/.gmem/<projectHash>/memory.db, with one db file per Solana project (project root resolved from Anchor.toml or workspace Cargo.toml).",
+          "description": "Override the auto-resolved memory database path. Defaults to ~/.gmem/<projectHash>/memory.db, with one db file per project (project root resolved from Anchor.toml or workspace Cargo.toml).",
           "isRequired": false,
           "format": "string",
           "isSecret": false,
           "name": "GMEM_DB"
+        },
+        {
+          "description": "Helius RPC API key, used by `gmem.ingest_agent_activity` when running live (v1.2+). Not required for offline fixture-mode ingest.",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true,
+          "name": "HELIUS_API_KEY"
         }
       ]
     }
