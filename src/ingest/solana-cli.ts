@@ -55,7 +55,7 @@ function expandPath(p: string): string {
  * does not exist; soft-fails (via the `warnings` array) for parse errors and
  * for an unreadable keypair file.
  */
-export function readSolanaCliContext(configPath?: string): SolanaCliContext {
+export async function readSolanaCliContext(configPath?: string): Promise<SolanaCliContext> {
   const path = configPath ?? defaultConfigPath();
   if (!existsSync(path)) {
     throw new Error(`Solana CLI config not found at ${path}. Run \`solana config get\` to verify, or pass an explicit configPath.`);
@@ -91,7 +91,7 @@ export function readSolanaCliContext(configPath?: string): SolanaCliContext {
     } else {
       try {
         const secret = JSON.parse(readFileSync(keypairPath, "utf8")) as number[];
-        const kp = Keypair.fromSecretKey(Uint8Array.from(secret));
+        const kp = await Keypair.fromSecretKey(Uint8Array.from(secret));
         ctx.pubkey = kp.publicKey.toBase58();
       } catch (e) {
         warnings.push(`Could not read keypair at ${keypairPath}: ${(e as Error).message}`);
@@ -115,4 +115,4 @@ export function isValidPubkey(s: string): boolean {
   } catch {
     return false;
   }
-}
+  }
