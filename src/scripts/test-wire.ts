@@ -58,8 +58,19 @@ async function main() {
   const listRes = await client.callTool({ name: "gmem.list_decisions", arguments: {} });
   console.log("list_decisions:", JSON.stringify(listRes.content, null, 2));
 
-  // diff stub
-  const diffRes = await client.callTool({ name: "gmem.diff", arguments: { from: "HEAD~1", to: "HEAD" } });
+  // diff stub — HEAD~1 does not exist in a shallow clone; fall back to HEAD..HEAD
+  // (an empty diff) so the wire path is still exercised either way.
+  const { execSync } = await import("node:child_process");
+  let hasParent = false;
+  try {
+    execSync("git rev-parse --verify HEAD~1", { stdio: "ignore" });
+    hasParent = true;
+  } catch {
+    hasParent = false;
+  }
+  const fromRef = hasParent ? "HEAD~1" : "HEAD";
+  if (!hasParent) console.log("shallow clone: HEAD~1 unavailable, diffing HEAD..HEAD");
+  const diffRes = await client.callTool({ name: "gmem.diff", arguments: { from: fromRef, to: "HEAD" } });
   console.log("diff stub:", JSON.stringify(diffRes.content, null, 2));
 
   await client.close();
