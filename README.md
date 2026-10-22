@@ -7,8 +7,8 @@ or anything that speaks MCP — durable, Solana-aware memory of a project across
 program IDs, IDLs, PDA seeds, deployment state, architectural decisions, audit findings.
 So agents stop forgetting what they built yesterday.
 
-Status: **v1.1 — stable, with EVM support.**
-Seven MCP tools, real implementations (no stubs), backward-compatible wire format:
+Status: **v1.2 — stable, with EVM support and agent trust scoring.**
+Nine MCP tools, real implementations (no stubs), backward-compatible wire format:
 - Storage: SQLite via better-sqlite3, one db file per project (auto-resolved from
   `Anchor.toml` / workspace `Cargo.toml`, override with `GMEM_DB`)
 - Ranking: SQLite FTS5 BM25 with a recency boost
@@ -97,6 +97,8 @@ Then point your MCP client at it. For Claude Code:
 | `gmem.ingest_anchor()` | Auto-ingest an Anchor workspace: parse `Anchor.toml`, capture IDL sha256s from `target/idl/`, record the current git HEAD as source commit, write one Program per (program, cluster) pair |
 | `gmem.solana_context()` | Read the active Solana CLI config (`~/.config/solana/cli/config.yml`), return the configured cluster + RPC URL + active-keypair pubkey. Used by `gmem.write` to auto-attribute Decision entries to the developer wallet. Never returns the secret key. |
 | `gmem.ingest_hardhat()` | **v1.1** — Auto-ingest a Hardhat / EVM workspace: parses `hardhat.config.{ts,js,cjs,mjs}`, reads every deployment artifact under `deployments/<network>/<Contract>.json` (the hardhat-deploy convention), classifies the network into a canonical chain (base-mainnet, optimism-mainnet, etc.), records a reorder-invariant ABI SHA-256 and git HEAD as `sourceCommit`. Writes one Contract entity per (chain, address) pair. |
+| `gmem.ingest_agent_activity(pubkey, cluster?)` | **v1.2** — Pull Solana activity for an autonomous-agent wallet via Helius RPC, aggregate it (tx count, distinct peers, failure ratio, wallet age, sanctioned-neighbor count), score it with the transparent v1 heuristic, and write one `Agent` entity per (cluster, pubkey). Set `HELIUS_API_KEY` or pass `apiKey`; `fixturePath` runs offline against a snapshot. |
+| `gmem.score_agent(pubkey, cluster?)` | **v1.2** — Return the latest stored `Agent` trust score with the heuristic breakdown showing which factors moved it. Read-only: no RPC call, no write — run `gmem.ingest_agent_activity` first. |
 
 Full input/output JSON schemas are in [`SPEC.md`](./SPEC.md).
 
@@ -138,6 +140,9 @@ cross-project search, agent reputation, on-chain memory anchoring. These are tra
   [PR #168 in `solana-foundation/awesome-solana-ai`](https://github.com/solana-foundation/awesome-solana-ai/pull/168)
 - [x] v1.1 — EVM / Hardhat support (Base, Optimism, Polygon, Arbitrum, Ethereum, plus testnets),
   new `Contract` entity, `gmem.ingest_hardhat` tool, [worked example 04-evm-vault](./examples/04-evm-vault/)
+- [x] v1.2 — Agent trust scoring: new `Agent` entity, `gmem.ingest_agent_activity` +
+  `gmem.score_agent` tools, [worked example 05-agent-reputation](./examples/05-agent-reputation/),
+  MCP Registry surface (`server.json` 1.2.0)
 
 ## Contributing
 
