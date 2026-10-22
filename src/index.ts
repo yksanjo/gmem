@@ -182,7 +182,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       // caller hasn't already set a `notes` line claiming attribution.
       if (kind === "Decision" && !entity.author) {
         try {
-          const ctx = readSolanaCliContext();
+          const ctx = await readSolanaCliContext();
           if (ctx.pubkey && isValidPubkey(ctx.pubkey)) {
             (entity as Record<string, unknown>).author = ctx.pubkey;
             if (ctx.cluster) (entity as Record<string, unknown>).authorCluster = ctx.cluster;
@@ -231,7 +231,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     case "gmem.solana_context": {
       const configPath = typeof a.configPath === "string" ? a.configPath : undefined;
       try {
-        const ctx = readSolanaCliContext(configPath);
+        const ctx = await readSolanaCliContext(configPath);
         return jsonResult({
           ok: true,
           configPath: ctx.configPath,
