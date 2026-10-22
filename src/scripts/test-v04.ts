@@ -28,7 +28,7 @@ const cfgPath = resolve(tmp, "config.yml");
 
 try {
   header("1. Build a fake Solana CLI config + keypair");
-  const kp = Keypair.generate();
+  const kp = await Keypair.generate();
   writeFileSync(keyPath, JSON.stringify(Array.from(kp.secretKey)), { mode: 0o600 });
   writeFileSync(
     cfgPath,
@@ -45,7 +45,7 @@ try {
   console.log(`  config:      ${cfgPath}`);
 
   header("2. readSolanaCliContext should classify cluster + derive pubkey");
-  const ctx = readSolanaCliContext(cfgPath);
+  const ctx = await readSolanaCliContext(cfgPath);
   console.log(`  rpcUrl:      ${ctx.rpcUrl}`);
   console.log(`  cluster:     ${ctx.cluster}`);
   console.log(`  commitment:  ${ctx.commitment}`);
@@ -81,7 +81,7 @@ try {
       `json_rpc_url: ${rpc}`,
       `keypair_path: ${keyPath}`,
     ].join("\n"));
-    const c = readSolanaCliContext(cfgPath);
+    const c = await readSolanaCliContext(cfgPath);
     console.log(`  ${rpc.padEnd(50)} -> ${c.cluster}`);
     assert(c.cluster === expected, `expected ${expected} for ${rpc}, got ${c.cluster}`);
   }
@@ -101,7 +101,7 @@ try {
     rationale: "Anchor's IDL+macros pay off for agent tooling.",
     date: new Date().toISOString(),
   };
-  const liveCtx = readSolanaCliContext(cfgPath);
+  const liveCtx = await readSolanaCliContext(cfgPath);
   if (liveCtx.pubkey) {
     entity.author = liveCtx.pubkey;
     if (liveCtx.cluster) entity.authorCluster = liveCtx.cluster;
