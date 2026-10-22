@@ -22,14 +22,14 @@ not support cross-project queries.
 
 ## 2. Storage
 
-The reference implementation uses SQLite by default. A Postgres backend is supported
+The reference implementation uses SQLite by default. A Postgres backend is planned
 for team setups. Storage is local — there is no hosted dependency, no cloud sync, no
 remote authentication. The memory file (`memory.db` by default) is the source of truth
 and can be checked into a repo if a team wants to share memory.
 
 ## 3. Entity model
 
-gmem stores six first-class entity types. The JSON schemas live in [`schema/`](./schema/).
+gmem stores eight first-class entity types. The JSON schemas live in [`schema/`](./schema/).
 
 ### 3.1 Program
 
@@ -128,6 +128,31 @@ A dependency on an external Solana program.
 | `versionPinned` | string | no | SDK/program version pinned by this project |
 | `purpose` | string | yes | Why this project integrates |
 | `addedAt` | string (ISO 8601) | yes | |
+
+### 3.7 Agent (v1.2+)
+
+An autonomous agent identified by a Solana wallet, with on-chain activity
+provenance and a reputation score, so other agents (and the humans paying
+them) can decide whether to transact. Introduced in v1.2; older clients that
+don't expose the `Agent` kind via `kinds` filter will not receive it.
+
+| Field | Type | Required | Notes |
+| ----- | ---- | -------- | ----- |
+| `pubkey` | string (base58, 32-44 chars) | yes | The agent's primary wallet |
+| `cluster` | string enum | yes | `mainnet-beta` / `devnet` / `testnet` / `localnet` |
+| `name` | string | no | Human label, when known |
+| `firstSeen` | string (ISO 8601) | no | Earliest observed transaction |
+| `lastSeen` | string (ISO 8601) | no | Most recent observed transaction |
+| `txCount` | integer | no | Transactions observed in the ingest window |
+| `peerCount` | integer | no | Distinct counterparty wallets |
+| `failureRatio` | number (0-1) | no | Fraction of observed transactions that errored on-chain |
+| `sanctionedNeighborCount` | integer | no | Counterparties on the caller-supplied blocklist |
+| `score` | number (0-100) | no | Trust score; 0 = do not transact |
+| `scoreVersion` | string enum | no | `v1-heuristic` / `v2-llm-judge` |
+| `scoreReasoning` | string | no | Factor breakdown; required for `v1-heuristic` |
+| `scoredAt` | string (ISO 8601) | no | When `score` was computed |
+| `sourceCommit` | string (git sha) | no | gmem build that produced the record |
+| `notes` | string | no | |
 
 ## 4. MCP tools (wire-level)
 
@@ -250,7 +275,7 @@ The following are deliberately not in scope for gmem v1.0:
 
 - Hosted multi-user sync
 - Cross-project search
-- Agent reputation / authentication
+- Agent authentication
 - On-chain memory anchoring
 - AI-driven summarization of memory entries
 
